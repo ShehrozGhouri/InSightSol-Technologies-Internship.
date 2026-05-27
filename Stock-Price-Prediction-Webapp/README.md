@@ -1,7 +1,3 @@
-### Stock Price Prediction Folder
-Create a new file named **`README.md`** inside your **`Stock-Price-Prediction-Webapp`** folder, paste this code inside, and save it:
-
-```markdown
 # 📈 Stock Price Prediction Webapp
 
 An interactive financial analytics web application engineered to parse quantitative asset trends and calculate predictive performance metrics from continuous historical parameters.
@@ -20,6 +16,7 @@ An interactive financial analytics web application engineered to parse quantitat
 
 ## 🏃‍♂️ How to Run This Webapp Separately
 If you want to spin up just this specific application, execute these commands from the root folder:
+
 ```bash
 cd Stock-Price-Prediction-Webapp
 python app.py
