@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI-Powered Vehicle Evaluation Suite</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #020308;
+            --panel-bg: rgba(10, 12, 32, 0.65);
+            --neon-blue: #00f0ff;
+            --neon-pink: #ff007f;
+            --neon-purple: #9d4edd;
+            --text-main: #f1f5f9;
+            --text-dim: #38bdf8;
+            --label-gray: #64748b;
+            --card-inline-bg: rgba(4, 5, 15, 0.8);
+            --neon-glow: 0 0 15px rgba(0, 240, 255, 0.4);
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: radial-gradient(circle at 50% 50%, #161233 0%, var(--bg-dark) 100%);
+            color: var(--text-main);
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        .dashboard {
+            background: var(--panel-bg);
+            backdrop-filter: blur(35px);
+            -webkit-backdrop-filter: blur(35px);
+            padding: 45px;
+            border-radius: 32px;
+            border: 1px solid rgba(0, 240, 255, 0.2);
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.8), 0 0 50px rgba(255, 0, 127, 0.08);
+            width: 100%;
+            max-width: 1200px;
+            display: grid;
+            grid-template-columns: 1.15fr 1fr;
+            gap: 45px;
+            animation: containerEntrance 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+
+        @media (max-width: 950px) {
+            .dashboard { grid-template-columns: 1fr; padding: 30px; gap: 35px; }
+        }
+
+        .main-title {
+            font-family: 'Space Grotesk', sans-serif;
+            margin: 0 0 6px 0;
+            font-size: 36px;
+            font-weight: 700;
+            background: linear-gradient(90deg, var(--neon-blue), var(--neon-pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.5px;
+            text-shadow: 0 0 30px rgba(0, 240, 255, 0.1);
+        }
+
+        .subtitle {
+            color: var(--text-dim);
+            margin-bottom: 40px;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 600;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 30px;
+        }
+
+        .form-group { display: flex; flex-direction: column; }
+        .form-group.full-width { grid-column: span 2; }
+        .form-group.triple-span { grid-column: span 2; display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+        @media (max-width: 600px) { .form-group.triple-span { grid-template-columns: 1fr; } }
+
+        .label-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            width: 100%;
+        }
+
+        label {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--label-gray);
+            transition: color 0.3s;
+        }
+
+        .slider-value {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--neon-pink);
+            font-family: 'Space Grotesk', sans-serif;
+            background: rgba(255, 0, 127, 0.08);
+            padding: 2px 10px;
+            border-radius: 6px;
+            border: 1px solid rgba(255, 0, 127, 0.2);
+        }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 6px;
+            background: #0d1127;
+            border-radius: 10px;
+            outline: none;
+            margin: 10px 0;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--neon-pink);
+            cursor: pointer;
+            box-shadow: 0 0 12px var(--neon-pink);
+            transition: transform 0.2s ease;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.3);
+            background: #ffffff;
+            box-shadow: 0 0 20px #ffffff;
+        }
+
+        select {
+            padding: 14px 16px;
+            border: 1px solid rgba(0, 240, 255, 0.15);
+            background: rgba(4, 6, 20, 0.9);
+            color: var(--text-main);
+            border-radius: 14px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            -webkit-appearance: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='none'><path stroke='%2300f0ff' stroke-width='1.5' stroke-linecap='round' d='M1 1l4 4 4-4'/></svg>");
+            background-repeat: no-repeat;
+            background-position: right 16px center;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: var(--neon-pink);
+            box-shadow: 0 0 18px rgba(255, 0, 127, 0.3);
+        }
+
+        .form-group:focus-within label { color: var(--neon-blue); text-shadow: var(--neon-glow); }
+
+        .btn-submit {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(90deg, var(--neon-blue), var(--neon-purple), var(--neon-pink));
+            color: #020308;
+            border: none;
+            border-radius: 14px;
+            font-size: 16px;
+            font-weight: 700;
+            font-family: 'Space Grotesk', sans-serif;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            box-shadow: 0 4px 30px rgba(0, 240, 255, 0.25);
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 40px rgba(255, 0, 127, 0.4);
+            filter: brightness(1.1);
+        }
+
+        .right-panel { display: flex; flex-direction: column; justify-content: center; }
+
+        .result-box {
+            background: rgba(4, 5, 20, 0.85);
+            border: 1px solid rgba(255, 0, 127, 0.25);
+            border-radius: 28px;
+            padding: 35px;
+            box-shadow: 0 25px 55px rgba(0, 0, 0, 0.7), 0 0 40px rgba(255, 0, 127, 0.1);
+            animation: cardReveal 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+            text-align: center;
+        }
+
+        .empty-state {
+            border: 1px dashed rgba(0, 240, 255, 0.2);
+            border-radius: 28px;
+            padding: 60px 40px;
+            text-align: center;
+            color: var(--label-gray);
+            font-size: 14px;
+            background: rgba(4, 5, 20, 0.4);
+        }
+
+        .result-title {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 2.5px;
+            color: var(--neon-blue);
+            margin-bottom: 8px;
+            font-weight: 700;
+            text-shadow: var(--neon-glow);
+        }
+
+        .result-value {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 42px;
+            font-weight: 700;
+            color: #ffffff;
+            text-shadow: 0 0 20px rgba(255, 0, 127, 0.8), 0 0 40px rgba(0, 240, 255, 0.3);
+            margin-bottom: 30px;
+        }
+
+        .specs-summary-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin: 15px 0 25px 0;
+            text-align: left;
+        }
+        @media (max-width: 600px) { .specs-summary-grid { grid-template-columns: 1fr 1fr; } }
+
+        .spec-item-interactive {
+            background: var(--card-inline-bg);
+            border: 1px solid rgba(0, 240, 255, 0.1);
+            padding: 10px 14px;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.2s ease;
+        }
+        .spec-item-interactive.span-three { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        @media (max-width: 600px) { .spec-item-interactive.span-three { grid-template-columns: 1fr; } }
+
+        .spec-item-interactive:hover {
+            border-color: var(--neon-pink);
+            box-shadow: 0 0 10px rgba(255, 0, 127, 0.15);
+        }
+
+        .spec-label {
+            font-size: 9px;
+            color: var(--label-gray);
+            text-transform: uppercase;
+            font-weight: 700;
+            margin-bottom: 4px;
+            letter-spacing: 0.5px;
+        }
+
+        .spec-inline-select, .spec-inline-input {
+            background: transparent;
+            border: none;
+            color: var(--text-main);
+            font-size: 13px;
+            font-weight: 600;
+            font-family: inherit;
+            padding: 0;
+            width: 100%;
+            outline: none;
+            cursor: pointer;
+        }
+        .spec-inline-select option { background: #040514; color: var(--text-main); }
+
+        .btn-re-evaluate {
+            padding: 12px 24px;
+            background: rgba(255, 0, 127, 0.1);
+            border: 1px solid var(--neon-pink);
+            color: #ff94cc;
+            font-size: 12px;
+            font-weight: 700;
+            font-family: 'Space Grotesk', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 25px;
+        }
+        .btn-re-evaluate:hover {
+            background: linear-gradient(90deg, rgba(0, 240, 255, 0.15), rgba(255, 0, 127, 0.15));
+            border-color: var(--neon-blue);
+            color: #ffffff;
+            transform: translateY(-2px);
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.3);
+        }
+
+        .graph-container { width: 100%; max-width: 290px; margin: 0 auto; }
+
+        .brand-footer {
+            margin-top: 40px;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            color: rgba(255, 255, 255, 0.15);
+            text-shadow: 0 0 10px rgba(0, 240, 255, 0.2);
+            text-align: center;
+        }
+        .brand-footer span {
+            background: linear-gradient(90deg, var(--neon-blue), var(--neon-pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+    </style>
+</head>
+<body>
+
+<div class="dashboard">
+    <div class="left-panel">
+        <h2 class="main-title">Vehicle Evaluation Engine</h2>
+        <p class="subtitle">Ensemble Random Forest Prediction Pipeline</p>
+        
+        <form id="primaryForm" action="/predict" method="POST">
+            <div class="form-grid">
+                
+                <div class="form-group triple-span">
+                    <div style="display: flex; flex-direction: column;">
+                        <label for="brand" style="margin-bottom:8px;">Brand</label>
+                        <select id="brand" name="brand" required onchange="syncDropdown('brand', this.value)">
+                            <option value="18">Maruti</option>
+                            <option value="10">Hyundai</option>
+                            <option value="26">Toyota</option>
+                            <option value="9">Honda</option>
+                            <option value="17">Mahindra</option>
+                            <option value="25">Tata</option>
+                            <option value="8">Ford</option>
+                            <option value="27">Volkswagen</option>
+                            <option value="23">Renault</option>
+                            <option value="3">Chevrolet</option>
+                            <option value="24">Skoda</option>
+                            <option value="21">Nissan</option>
+                            <option value="1">Audi</option>
+                            <option value="2">BMW</option>
+                            <option value="19">Mercedes-Benz</option>
+                            <option value="5">Datsun</option>
+                            <option value="6">Fiat</option>
+                            <option value="13">Jeep</option>
+                            <option value="28">Volvo</option>
+                            <option value="12">Jaguar</option>
+                            <option value="20">Mitsubishi</option>
+                            <option value="15">Land Rover</option>
+                            <option value="14">Kia</option>
+                            <option value="16">MG</option>
+                            <option value="7">Force</option>
+                            <option value="11">Isuzu</option>
+                            <option value="4">Daewoo</option>
+                            <option value="0">Ambassador</option>
+                            <option value="22">OpelCorsa</option>
+                        </select>
+                    </div>
+
+                    <div style="display: flex; flex-direction: column;">
+                        <label for="model" style="margin-bottom:8px;">Model</label>
+                        <select id="model" name="model" required onchange="syncDropdown('model', this.value)">
+                            </select>
+                    </div>
+
+                    <div style="display: flex; flex-direction: column;">
+                        <label for="variant" style="margin-bottom:8px;">Variant</label>
+                        <select id="variant" name="variant" required onchange="syncDropdown('variant', this.value)">
+                            </select>
+                    </div>
+                </div>
+
+                <div class="form-group full-width">
+                    <div class="label-container">
+                        <label for="year">Model Year</label>
+                        <span class="slider-value" id="yearVal">2015</span>
+                    </div>
+                    <input type="range" id="year" name="year" min="1992" max="2020" value="{{ current_year if current_year is not none else 2015 }}" oninput="syncYear(this.value)">
+                </div>
+
+                <div class="form-group full-width">
+                    <div class="label-container">
+                        <label for="km_driven">Kilometers Driven</label>
+                        <span class="slider-value" id="kmVal">60,000 km</span>
+                    </div>
+                    <input type="range" id="km_driven" name="km_driven" min="1" max="806599" step="500" value="{{ current_km if current_km is not none else 60000 }}" oninput="syncKm(this.value)">
+                </div>
+
+                <div class="form-group">
+                    <label for="fuel_type">Fuel Type</label>
+                    <select id="fuel_type" name="fuel_type" required onchange="syncDropdown('fuel_type', this.value)">
+                        <option value="4" {% if current_fuel == 4 %}selected{% endif %}>Petrol</option>
+                        <option value="1" {% if current_fuel == 1 %}selected{% endif %}>Diesel</option>
+                        <option value="0" {% if current_fuel == 0 %}selected{% endif %}>CNG</option>
+                        <option value="3" {% if current_fuel == 3 %}selected{% endif %}>LPG</option>
+                        <option value="2" {% if current_fuel == 2 %}selected{% endif %}>Electric</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="transmission">Transmission</label>
+                    <select id="transmission" name="transmission" required onchange="syncDropdown('transmission', this.value)">
+                        <option value="1" {% if current_trans == 1 %}selected{% endif %}>Manual</option>
+                        <option value="0" {% if current_trans == 0 %}selected{% endif %}>Automatic</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="seller_type">Seller Category</label>
+                    <select id="seller_type" name="seller_type" required onchange="syncDropdown('seller_type', this.value)">
+                        <option value="1" {% if current_seller == 1 %}selected{% endif %}>Individual</option>
+                        <option value="0" {% if current_seller == 0 %}selected{% endif %}>Dealer</option>
+                        <option value="2" {% if current_seller == 2 %}selected{% endif %}>Trustmark Dealer</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="owner">Previous Owners</label>
+                    <select id="owner" name="owner" required onchange="syncDropdown('owner', this.value)">
+                        <option value="0" {% if current_owner == 0 %}selected{% endif %}>First Owner</option>
+                        <option value="2" {% if current_owner == 2 %}selected{% endif %}>Second Owner</option>
+                        <option value="4" {% if current_owner == 4 %}selected{% endif %}>Third Owner</option>
+                        <option value="1" {% if current_owner == 1 %}selected{% endif %}>Fourth & Above</option>
+                        <option value="3" {% if current_owner == 3 %}selected{% endif %}>Test Drive Car</option>
+                    </select>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-submit">Analyze Market Evaluation</button>
+        </form>
+    </div>
+
+    <div class="right-panel">
+        {% if prediction_text %}
+            <form id="inlineForm" action="/predict" method="POST" class="result-box">
+                <div class="result-title">Algorithmic Evaluation</div>
+                <div class="result-value" id="priceDisplay">{{ prediction_text }}</div>
+                
+                <div class="result-title" style="color: var(--neon-blue); margin-bottom: 12px;">Configuration Summary Matrix</div>
+                
+                <div class="specs-summary-grid">
+                    <div class="spec-item-interactive span-three">
+                        <div>
+                            <div class="spec-label">Brand</div>
+                            <select class="spec-inline-select" name="brand" id="inline_brand" onchange="syncDropdown('brand', this.value)">
+                                <option value="18">Maruti</option>
+                                <option value="10">Hyundai</option>
+                                <option value="26">Toyota</option>
+                                <option value="9">Honda</option>
+                                <option value="17">Mahindra</option>
+                                <option value="25">Tata</option>
+                                <option value="8">Ford</option>
+                                <option value="27">Volkswagen</option>
+                                <option value="23">Renault</option>
+                                <option value="3">Chevrolet</option>
+                                <option value="24">Skoda</option>
+                                <option value="21">Nissan</option>
+                                <option value="1">Audi</option>
+                                <option value="2">BMW</option>
+                                <option value="19">Mercedes-Benz</option>
+                                <option value="5">Datsun</option>
+                                <option value="6">Fiat</option>
+                                <option value="13">Jeep</option>
+                                <option value="28">Volvo</option>
+                                <option value="12">Jaguar</option>
+                                <option value="20">Mitsubishi</option>
+                                <option value="15">Land Rover</option>
+                                <option value="14">Kia</option>
+                                <option value="16">MG</option>
+                                <option value="7">Force</option>
+                                <option value="11">Isuzu</option>
+                                <option value="4">Daewoo</option>
+                                <option value="0">Ambassador</option>
+                                <option value="22">OpelCorsa</option>
+                            </select>
+                        </div>
+                        <div>
+                            <div class="spec-label">Model</div>
+                            <select class="spec-inline-select" name="model" id="inline_model" onchange="syncDropdown('model', this.value)">
+                                </select>
+                        </div>
+                        <div>
+                            <div class="spec-label">Variant</div>
+                            <select class="spec-inline-select" name="variant" id="inline_variant" onchange="syncDropdown('variant', this.value)">
+                                </select>
+                        </div>
+                    </div>
+
+                    <div class="spec-item-interactive">
+                        <div class="spec-label">Year</div>
+                        <input type="number" class="spec-inline-input" name="year" id="inline_year" min="1992" max="2020" value="{{ current_year }}" oninput="syncYear(this.value)">
+                    </div>
+                    <div class="spec-item-interactive">
+                        <div class="spec-label">Mileage (km)</div>
+                        <input type="number" class="spec-inline-input" name="km_driven" id="inline_km_driven" min="1" max="806599" value="{{ current_km }}" oninput="syncKm(this.value)">
+                    </div>
+                    <div class="spec-item-interactive">
+                        <div class="spec-label">Fuel</div>
+                        <select class="spec-inline-select" name="fuel_type" id="inline_fuel_type" onchange="syncDropdown('fuel_type', this.value)">
+                            <option value="4" {% if current_fuel == 4 %}selected{% endif %}>Petrol</option>
+                            <option value="1" {% if current_fuel == 1 %}selected{% endif %}>Diesel</option>
+                            <option value="0" {% if current_fuel == 0 %}selected{% endif %}>CNG</option>
+                            <option value="3" {% if current_fuel == 3 %}selected{% endif %}>LPG</option>
+                            <option value="2" {% if current_fuel == 2 %}selected{% endif %}>Electric</option>
+                        </select>
+                    </div>
+                    <div class="spec-item-interactive">
+                        <div class="spec-label">Gearbox</div>
+                        <select class="spec-inline-select" name="transmission" id="inline_transmission" onchange="syncDropdown('transmission', this.value)">
+                            <option value="1" {% if current_trans == 1 %}selected{% endif %}>Manual</option>
+                            <option value="0" {% if current_trans == 0 %}selected{% endif %}>Automatic</option>
+                        </select>
+                    </div>
+                    <div class="spec-item-interactive">
+                        <div class="spec-label">Seller</div>
+                        <select class="spec-inline-select" name="seller_type" id="inline_seller_type" onchange="syncDropdown('seller_type', this.value)">
+                            <option value="1" {% if current_seller == 1 %}selected{% endif %}>Individual</option>
+                            <option value="0" {% if current_seller == 0 %}selected{% endif %}>Dealer</option>
+                            <option value="2" {% if current_seller == 2 %}selected{% endif %}>Trustmark Dealer</option>
+                        </select>
+                    </div>
+                    <div class="spec-item-interactive">
+                        <div class="spec-label">History</div>
+                        <select class="spec-inline-select" name="owner" id="inline_owner" onchange="syncDropdown('owner', this.value)">
+                            <option value="0" {% if current_owner == 0 %}selected{% endif %}>First Owner</option>
+                            <option value="2" {% if current_owner == 2 %}selected{% endif %}>Second Owner</option>
+                            <option value="4" {% if current_owner == 4 %}selected{% endif %}>Third Owner</option>
+                            <option value="1" {% if current_owner == 1 %}selected{% endif %}>Fourth & Above</option>
+                            <option value="3" {% if current_owner == 3 %}selected{% endif %}>Test Drive Car</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-re-evaluate">Re-Evaluate Specs ⚡</button>
+                
+                <div class="graph-container">
+                    <canvas id="gaugeGraph" width="290" height="150"></canvas>
+                </div>
+            </form>
+        {% else %}
+            <div class="empty-state">
+                <p style="color: var(--neon-blue); font-weight: bold; font-size:16px; margin-top:0;">⚡ Awaiting input parameter variables.</p>
+                <p style="font-size: 12px; opacity: 0.6; max-width:240px; margin:0 auto; line-height:1.5;">Configure multi-tier vehicle specifications and execute analytical pipeline.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="brand-footer">Designed & Engineered by <span>Shehroz Ghouri</span></div>
+
+<script>
+    const hierarchy = {"0": {"32": [{"name": "AC", "value": 185}], "41": [{"name": "Gls", "value": 724}], "74": [{"name": "LMT", "value": 851}]}, "1": {"8": [{"name": "2.0 TDI MT", "value": 242}, {"name": "30 TFSI Premium", "value": 313}, {"name": "35 TDI Premium Plus", "value": 319}], "9": [{"name": "Sportback", "value": 1419}], "10": [{"name": "2.0 TDI Premium Plus", "value": 243}, {"name": "35 TDI Premium+", "value": 320}, {"name": "50 TFSI Matrix", "value": 339}], "11": [{"name": "Lounge", "value": 966}], "118": [{"name": "35 TDI Premium", "value": 318}], "119": [{"name": "2.0 TDI", "value": 241}], "120": [{"name": "35 TDI Premium Plus", "value": 319}], "123": [{"name": "Performance", "value": 1139}]}, "2": {"2": [{"name": "320d Luxury Line", "value": 308}, {"name": "320d Sport Line", "value": 310}], "3": [{"name": "520d Luxury Line", "value": 332}, {"name": "525d Luxury Line", "value": 334}, {"name": "530d M Sport", "value": 336}], "5": [{"name": "730Ld Eminence", "value": 352}], "167": [{"name": "sDrive 20d xLine", "value": 1904}], "168": [{"name": "xDrive 30d G05", "value": 2043}]}, "3": {"21": [{"name": "1.3 LS", "value": 105}], "27": [{"name": "1.2 Diesel LS", "value": 80}, {"name": "Diesel PS", "value": 526}, {"name": "LS Option Petrol", "value": 878}, {"name": "LT Petrol", "value": 885}], "35": [{"name": "2.0 LT AWD", "value": 235}], "46": [{"name": "1.6 LT MT", "value": 131}], "57": [{"name": "1.3 TCDi LS 7 Seater", "value": 112}], "110": [{"name": "1.8 LT iLite", "value": 154}], "134": [{"name": "1.2 LS", "value": 79}], "142": [{"name": "1.0 LT", "value": 41}], "149": [{"name": "Neo 2.5 LS 7 Str BSIII", "value": 1079}]}, "4": {"99": [{"name": "Standard", "value": 1422}]}, "5": {"72": [{"name": "D", "value": 462}, {"name": "T", "value": 1459}], "125": [{"name": "T", "value": 1459}, {"name": "T Option", "value": 1460}], "184": [{"name": "T Option", "value": 1460}]}, "6": {"22": [{"name": "Multijet Active", "value": 1054}], "44": [{"name": "1.2", "value": 65}], "75": [{"name": "Punto 1.3", "value": 1184}], "94": [{"name": "1.3 Multijet Dynamic", "value": 107}], "113": [{"name": "Stile 1.1 SLX", "value": 1426}], "117": [{"name": "1.2 EVO Dynamic", "value": 75}]}, "7": {"109": [{"name": "EX 2.6 7 Str SPU", "value": 535}]}, "8": {"20": [{"name": "Titanium Diesel", "value": 1528}], "41": [{"name": "1.4 TDCi EXI MT", "value": 118}], "51": [{"name": "1.5 Ti VCT Titanium MT", "value": 128}], "52": [{"name": "1.5 TDCi Titanium", "value": 122}, {"name": "1.5 TDCi Trend+", "value": 125}], "56": [{"name": "2.2 Titanium AT 4X2", "value": 257}, {"name": "3.2 Titanium AT 4X4", "value": 312}], "64": [{"name": "1.4 TDCi EXI", "value": 117}, {"name": "1.6 ZXI Duratec", "value": 133}], "65": [{"name": "1.2 Petrol LXI", "value": 85}, {"name": "1.4 TDCi EXI", "value": 117}, {"name": "Diesel Titanium", "value": 528}], "68": [{"name": "Titanium 1.5 TDCi", "value": 1522}], "69": [{"name": "1.6 Duratec +,", "value": 132}], "81": [{"name": "1.3 iFC", "value": 106}, {"name": "1.4 TDCi Rxi", "value": 119}]}, "9": {"13": [{"name": "VTI Coupe MT", "value": 1585}], "17": [{"name": "S i-DTEC", "value": 1294}, {"name": "SX i-DTEC", "value": 1337}, {"name": "VX i-DTEC", "value": 1545}], "24": [{"name": "V i-VTEC", "value": 1500}], "25": [{"name": "V i-VTEC", "value": 1500}], "30": [{"name": "1.2 VX MT", "value": 90}], "33": [{"name": "2.4 AT 4WD", "value": 264}], "39": [{"name": "1.5 E MT", "value": 114}, {"name": "1.5 GXI", "value": 115}, {"name": "1.5 V MT", "value": 129}, {"name": "i VTEC V", "value": 1827}, {"name": "i-DTEC VX", "value": 1836}, {"name": "i-VTEC CVT SV", "value": 1845}, {"name": "i-VTEC V", "value": 1851}], "40": [{"name": "1.8 V AT", "value": 151}], "86": [{"name": "1.2 V MT", "value": 89}, {"name": "1.5 VX i DTEC", "value": 130}], "101": [{"name": "E i DTEC", "value": 532}], "163": [{"name": "i-VTEC VX", "value": 1852}]}, "10": {"12": [{"name": "Executive Edition", "value": 605}, {"name": "GLE", "value": 673}], "44": [{"name": "1.4 CRDi SX", "value": 116}, {"name": "1.6 VTVT E+", "value": 145}, {"name": "1.6 VTVT S", "value": 146}, {"name": "1.6 VTVT SX", "value": 147}], "50": [{"name": "Era Plus", "value": 568}, {"name": "Magna O", "value": 1007}], "54": [{"name": "1.8 S", "value": 150}], "55": [{"name": "Asta 1.2", "value": 189}], "73": [{"name": "1.3 GLS MT", "value": 103}], "74": [{"name": "i10 Magna 1.2", "value": 1858}, {"name": "i10 Sportz", "value": 1861}], "135": [{"name": "2.2 CRDi GL MT 4WD", "value": 252}], "136": [{"name": "Sportz GLS", "value": 1421}], "140": [{"name": "2.4 Gls", "value": 266}], "155": [{"name": "2.0 CRDi AT GLS", "value": 238}], "159": [{"name": "1.0 Turbo GDI SX MT", "value": 43}, {"name": "1.4 CRDi SX MT", "value": 115}], "161": [{"name": "1.4 CRDi", "value": 113}, {"name": "1.6 VTVT", "value": 144}, {"name": "1.6 VTVT SX", "value": 147}, {"name": "Transform VTVT", "value": 1537}], "175": [{"name": "1.2 Kappa S", "value": 78}], "182": [{"name": "1.1 Era", "value": 53}, {"name": "Sportz 1.2", "value": 1420}], "183": [{"name": "1.2 Asta", "value": 66}, {"name": "1.4 Asta", "value": 110}, {"name": "Sportz 1.2", "value": 1420}]}, "11": {"47": [{"name": "V-Cross 4X4", "value": 1515}]}, "12": {"171": [{"name": "2.0 Diesel Portfolio", "value": 234}], "172": [{"name": "3.0 Premium Luxury", "value": 302}]}, "13": {"42": [{"name": "2.0 Longitude Option MT", "value": 232}]}, "14": {"139": [{"name": "HTK Plus 1.5", "value": 771}]}, "15": {"128": [{"name": "Freelander 2 SE", "value": 651}]}, "16": {"78": [{"name": "Sharp DCT", "value": 1404}]}, "17": {"16": [{"name": "G4 Gls 4WD AT", "value": 657}], "28": [{"name": "DI Turbo BSIII", "value": 454}, {"name": "PLUS Grand DI Turbo 9 Str", "value": 1113}, {"name": "ZLX", "value": 1797}], "84": [{"name": "CRDe", "value": 372}], "87": [{"name": "CJ 340 DP", "value": 321}], "89": [{"name": "100 mFALCON D75 K6", "value": 27}, {"name": "Trip 6 Str", "value": 1542}], "98": [{"name": "M2 7-Str", "value": 986}], "106": [{"name": "W6", "value": 1608}], "122": [{"name": "C4 D75", "value": 325}], "126": [{"name": "Logan 1.5 dCi DLX", "value": 951}], "138": [{"name": "2.6 DX CRDe", "value": 298}, {"name": "S10 7 Seater", "value": 1284}, {"name": "S4 7 Seater", "value": 1297}, {"name": "VLX 2WD AIRBAG BSIV", "value": 1531}], "146": [{"name": "9 Str", "value": 10}, {"name": "Commercial", "value": 421}], "148": [{"name": "T8", "value": 1466}], "151": [{"name": "CRDe 4x4 AC", "value": 374}], "160": [{"name": "1.5 dCi VDV Executive", "value": 129}], "173": [{"name": "W8 AMT", "value": 1622}], "174": [{"name": "W10 2WD", "value": 1601}, {"name": "W8 2WD", "value": 1618}, {"name": "W8 4WD", "value": 1619}], "177": [{"name": "E8 ABS BS IV", "value": 551}]}, "18": {"6": [{"name": "AC", "value": 185}, {"name": "Std", "value": 1424}], "7": [{"name": "Lxi", "value": 983}], "14": [{"name": "800 LXI", "value": 11}, {"name": "K10 LXI", "value": 894}, {"name": "LXI", "value": 947}], "26": [{"name": "Delta 1.2", "value": 469}, {"name": "Zeta DDiS 190", "value": 1814}], "37": [{"name": "LXI", "value": 947}, {"name": "VXI", "value": 1512}], "38": [{"name": "VXi Plus", "value": 1514}, {"name": "ZXi+", "value": 1817}], "53": [{"name": "5 STR WITH AC HTR", "value": 5}, {"name": "SMILE", "value": 1319}], "58": [{"name": "VXI MT", "value": 1513}, {"name": "ZDI", "value": 1785}], "59": [{"name": "VX", "value": 1541}], "60": [{"name": "LXI BSIV", "value": 948}], "74": [{"name": "i10 Magna 1.2", "value": 1858}], "76": [{"name": "King HT BSIV", "value": 923}], "80": [{"name": "1.2 Delta", "value": 72}], "108": [{"name": "8 Str BSIV", "value": 13}, {"name": "MPI Cargo BSIV", "value": 1004}], "127": [{"name": "VXI", "value": 1512}], "130": [{"name": "DDiS 200 Zeta", "value": 444}], "131": [{"name": "VXI", "value": 1512}], "132": [{"name": "ZXI MT", "value": 1793}], "147": [{"name": "1.3 LXI", "value": 108}, {"name": "Dzire LDI", "value": 490}, {"name": "VDI", "value": 1494}, {"name": "VXI", "value": 1512}], "162": [{"name": "Brezza ZDI", "value": 361}], "164": [{"name": "R LXI Minor", "value": 1211}, {"name": "VXI", "value": 1512}], "180": [{"name": "D", "value": 462}, {"name": "LXI", "value": 947}]}, "19": {"23": [{"name": "B180", "value": 231}], "31": [{"name": "220 CDI Avantgarde", "value": 249}, {"name": "C 220 CDI Avantgarde", "value": 366}], "49": [{"name": "E250 Edition E", "value": 544}], "70": [{"name": "GL 350 CDI Luxury", "value": 654}], "71": [{"name": "350d 4MATIC", "value": 322}], "96": [{"name": "ML 350 CDI Premium", "value": 1019}], "104": [{"name": "C-Class C 220 CDI Avantgarde", "value": 368}], "129": [{"name": "S 350 CDI", "value": 1301}]}, "20": {"102": [{"name": "3.2 AT", "value": 311}], "111": [{"name": "2.4 MIVEC MT", "value": 269}], "112": [{"name": "Sport 4X4 MT", "value": 1417}]}, "21": {"62": [{"name": "Evalia", "value": 62}], "91": [{"name": "Kicks 1.5", "value": 925}], "100": [{"name": "Active XV Petrol", "value": 194}, {"name": "XL Diesel", "value": 1639}], "144": [{"name": "XV D", "value": 1715}], "150": [{"name": "XL D 110 PS", "value": 1637}], "166": [{"name": "2.0 l", "value": 246}]}, "22": {"0": [{"name": "Standard", "value": 1422}], "1": [{"name": "Standard", "value": 1422}]}, "23": {"36": [{"name": "Iconic Edition", "value": 811}], "48": [{"name": "110PS Diesel RxZ", "value": 35}, {"name": "85PS Diesel RxL", "value": 44}, {"name": "RxL Petrol", "value": 1279}], "66": [{"name": "Diesel E4", "value": 527}], "90": [{"name": "RXT Petrol", "value": 1215}, {"name": "RxL", "value": 1276}], "92": [{"name": "2.0 Diesel 4WD AT", "value": 233}], "95": [{"name": "RxZ Diesel 110 PS", "value": 1282}], "116": [{"name": "RxL Diesel", "value": 1278}], "137": [{"name": "RxL Diesel", "value": 1278}], "154": [{"name": "RxZ", "value": 1281}]}, "24": {"63": [{"name": "1.2 MPI Active", "value": 81}], "93": [{"name": "1.9 TDI Ambiente MT", "value": 155}], "107": [{"name": "Style 2.0 TDI AT", "value": 1438}], "124": [{"name": "1.5 TDI Ambition", "value": 120}, {"name": "1.6 MPI Elegance", "value": 136}], "145": [{"name": "Elegance 2.0 TDI CR AT", "value": 558}], "179": [{"name": "4X2 Drive Elegance", "value": 14}]}, "25": {"15": [{"name": "XZ", "value": 1721}], "19": [{"name": "Pleasure 7 Str BS IV", "value": 1152}], "29": [{"name": "Revotron XT", "value": 1238}], "77": [{"name": "XE", "value": 1642}], "79": [{"name": "XT", "value": 1647}], "82": [{"name": "V2 eXeta DLS", "value": 1490}], "83": [{"name": "eCS LX TDI BSIII", "value": 1823}], "97": [{"name": "Aqua Quadrajet", "value": 185}], "103": [{"name": "Twist XT", "value": 1546}], "104": [{"name": "Safari DICOR 2.0 LX", "value": 1324}], "105": [{"name": "1.5 Revotorq XZ+", "value": 126}], "133": [{"name": "DICOR 2.2 LX 4x2", "value": 453}], "141": [{"name": "GOLD 2.4-Turbo 7 Str", "value": 658}], "143": [{"name": "Gold EX BSIV", "value": 732}], "152": [{"name": "Revotorq XB", "value": 1239}, {"name": "Revotron XZ", "value": 1241}], "153": [{"name": "Revotron XZ", "value": 1241}], "158": [{"name": "EX", "value": 533}], "165": [{"name": "DICOR Luxury 7 Str", "value": 455}], "176": [{"name": "XT", "value": 1647}], "181": [{"name": "Quadrajet XM", "value": 1198}]}, "26": {"34": [{"name": "W3", "value": 1604}], "43": [{"name": "Altis 1.8 G", "value": 15}, {"name": "Altis Diesel D4DG", "value": 18}], "61": [{"name": "G", "value": 655}, {"name": "LIVA G", "value": 944}, {"name": "V", "value": 1493}], "67": [{"name": "2.8 4WD AT", "value": 272}, {"name": "3.0 4x2 MT", "value": 296}], "85": [{"name": "2.5 G 8 STR BS IV", "value": 218}, {"name": "2.5 VX 8 STR BS IV", "value": 224}, {"name": "Crysta 2.4 VX MT 8 STR", "value": 443}], "121": [{"name": "FS 7 STR", "value": 639}], "178": [{"name": "G", "value": 655}]}, "27": {"18": [{"name": "1.2 MPI Comfortline", "value": 82}], "45": [{"name": "1.2 MPI", "value": 80}], "88": [{"name": "2.0 Highline TDI AT", "value": 234}], "114": [{"name": "Highline TDI AT", "value": 789}], "115": [{"name": "1.2 MPI Trendline", "value": 84}, {"name": "1.5 TDI Comfortline", "value": 121}], "157": [{"name": "1.5 TDI Highline AT", "value": 124}, {"name": "1.6 Highline", "value": 134}]}, "28": {"156": [{"name": "D3 R-Design", "value": 435}], "169": [{"name": "60 D4 Kinetic", "value": 10}, {"name": "90 D5 Inscription", "value": 12}], "170": [{"name": "D4 Premium", "value": 439}]}};
+
+    const lookup = {
+        "0": {"32": "CLASSIC", "41": "Classic", "74": "Grand"},
+        "1": {"8": "A4", "9": "A5", "10": "A6", "11": "A8", "118": "Q3", "119": "Q5", "120": "Q7", "123": "RS7"},
+        "2": {"2": "3 Series", "3": "5 Series", "5": "7 Series", "167": "X1", "168": "X5"},
+        "3": {"21": "Aveo", "27": "Beat", "35": "Captiva", "46": "Cruze", "57": "Enjoy", "110": "Optra", "134": "Sail", "142": "Spark", "149": "Tavera"},
+        "5": {"72": "GO", "125": "RediGO", "184": "redi-GO"},
+        "6": {"22": "Avventura", "44": "500", "75": "Grande Punto", "94": "Linea", "113": "Palio", "117": "Punto"},
+        "8": {"20": "Aspire", "41": "Classic", "51": "EcoSport", "52": "Ecosport", "56": "Endeavour", "64": "Fiesta", "65": "Figo", "68": "Freestyle", "69": "Fusion", "81": "Ikon"},
+        "9": {"13": "Accord", "17": "Amaze", "24": "BR-V", "25": "BRV", "30": "Brio", "33": "CR-V", "39": "City", "40": "Civic", "86": "Jazz", "101": "Mobilio", "163": "WR-V"},
+        "10": {"12": "Accent", "44": "Creta", "50": "EON", "54": "Elantra", "55": "Elite i20", "73": "Getz", "74": "Grand i10", "135": "Santa Fe", "136": "Santro", "140": "Sonata", "155": "Tucson", "159": "Venue", "161": "Verna", "175": "Xcent", "182": "i10", "183": "i20"},
+        "17": {"16": "Alturas G4", "28": "Bolero", "84": "Ingenio", "87": "Jeep", "89": "KUV100", "98": "Marazzo", "106": "NuvoSport", "122": "Quanto", "126": "Renault Logan", "138": "Scorpio", "146": "Supro", "148": "TUV300", "151": "Thar", "160": "Verito", "173": "XUV300", "174": "XUV500", "177": "Xylo"},
+        "18": {"6": "800", "7": "A-Star", "14": "Alto", "26": "Baleno", "37": "Celerio", "38": "Ciaz", "53": "Eeco", "58": "Ertiga", "59": "Esteem", "60": "Estilo", "74": "Grand", "76": "Gypsy", "80": "Ignis", "108": "Omni", "127": "Ritz", "130": "S-Cross", "131": "S-Presso", "132": "SX4", "147": "Swift / Dzire", "162": "Vitara Brezza", "164": "Wagon R", "180": "Zen"},
+        "19": {"23": "B-Class", "31": "C-Class", "49": "E-Class", "70": "GL-Class", "71": "GLS", "96": "M-Class", "104": "New C-Class", "129": "S-Class"},
+        "21": {"62": "Evalia", "91": "Kicks", "100": "Micra", "144": "Sunny", "150": "Terrano", "166": "X-Trail"},
+        "23": {"36": "Captur", "48": "Duster", "66": "Fluence", "90": "KWID", "92": "Koleos", "95": "Lodgy", "116": "Pulse", "137": "Scala", "154": "Triber"},
+        "24": {"63": "Fabia", "93": "Laura", "107": "Octavia", "124": "Rapid", "145": "Superb", "179": "Yeti"},
+        "25": {"15": "Altroz", "19": "Aria", "29": "Bolt", "77": "Harrier", "79": "Hexa", "82": "Indica", "83": "Indigo", "97": "Manza", "103": "Nano", "104": "New Safari", "105": "Nexon", "133": "Safari", "141": "Spacio", "143": "Sumo", "152": "Tiago", "153": "Tigor", "158": "Venture", "165": "Winger", "176": "Xenon", "181": "Zest"},
+        "26": {"34": "Camry", "43": "Corolla", "61": "Etios", "67": "Fortuner", "85": "Innova", "121": "Qualis", "178": "Yaris"},
+        "27": {"18": "Ameo", "45": "CrossPolo", "88": "Jetta", "114": "Passat", "115": "Polo", "157": "Vento"},
+        "28": {"156": "V40", "169": "XC90", "170": "XC60"}
+    };
+
+    function populateModelsForBrand(brandVal, defaultModelVal = null) {
+        const modelSelect = document.getElementById('model');
+        const inlineModelSelect = document.getElementById('inline_model');
+        
+        modelSelect.innerHTML = '';
+        if (inlineModelSelect) inlineModelSelect.innerHTML = '';
+        
+        const modelsMap = hierarchy[brandVal] || {};
+        const brandLookup = lookup[brandVal] || {};
+        
+        Object.keys(modelsMap).forEach(mCode => {
+            const modelName = brandLookup[mCode] || ("Model ID " + mCode);
+            const opt = document.createElement('option');
+            opt.value = mCode;
+            opt.innerText = modelName;
+            
+            modelSelect.appendChild(opt.cloneNode(true));
+            if (inlineModelSelect) inlineModelSelect.appendChild(opt.cloneNode(true));
+        });
+        
+        if (defaultModelVal) {
+            modelSelect.value = defaultModelVal;
+            if (inlineModelSelect) inlineModelSelect.value = defaultModelVal;
+        }
+    }
+
+    function populateVariantsForModel(brandVal, modelVal, defaultVariantVal = null) {
+        const variantSelect = document.getElementById('variant');
+        const inlineVariantSelect = document.getElementById('inline_variant');
+        
+        variantSelect.innerHTML = '';
+        if (inlineVariantSelect) inlineVariantSelect.innerHTML = '';
+        
+        const modelsMap = hierarchy[brandVal] || {};
+        const variantsList = modelsMap[modelVal] || [];
+        
+        variantsList.forEach(v => {
+            const opt = document.createElement('option');
+            opt.value = v.value;
+            opt.innerText = v.name;
+            
+            variantSelect.appendChild(opt.cloneNode(true));
+            if (inlineVariantSelect) inlineVariantSelect.appendChild(opt.cloneNode(true));
+        });
+        
+        if (defaultVariantVal) {
+            variantSelect.value = defaultVariantVal;
+            if (inlineVariantSelect) inlineVariantSelect.value = defaultVariantVal;
+        }
+    }
+
+    function syncYear(val) {
+        document.getElementById('year').value = val;
+        document.getElementById('yearVal').innerText = val;
+        const inline = document.getElementById('inline_year');
+        if(inline) inline.value = val;
+    }
+
+    function syncKm(val) {
+        document.getElementById('km_driven').value = val;
+        document.getElementById('kmVal').innerText = Number(val).toLocaleString() + " km";
+        const inline = document.getElementById('inline_km_driven');
+        if(inline) inline.value = val;
+    }
+
+    function syncDropdown(id, val) {
+        const mainEl = document.getElementById(id);
+        const inlineEl = document.getElementById('inline_' + id);
+        
+        if (mainEl) mainEl.value = val;
+        if (inlineEl) inlineEl.value = val;
+        
+        if (id === 'brand') {
+            populateModelsForBrand(val);
+            const currentModel = document.getElementById('model').value;
+            populateVariantsForModel(val, currentModel);
+        } 
+        else if (id === 'model') {
+            const currentBrand = document.getElementById('brand').value;
+            populateVariantsForModel(currentBrand, val);
+        }
+    }
+    
+    window.onload = function() {
+        const initialBrand = "{{ current_brand if current_brand is not none else 18 }}";
+        const initialModel = "{{ current_model if current_model is not none else 147 }}";
+        const initialVariant = "{{ current_variant if current_variant is not none else 1494 }}";
+        
+        document.getElementById('brand').value = initialBrand;
+        if (document.getElementById('inline_brand')) document.getElementById('inline_brand').value = initialBrand;
+        
+        populateModelsForBrand(initialBrand, initialModel);
+        populateVariantsForModel(initialBrand, initialModel, initialVariant);
+        
+        syncYear(document.getElementById('year').value);
+        syncKm(document.getElementById('km_driven').value);
+        
+        ['fuel_type', 'transmission', 'seller_type', 'owner'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) syncDropdown(id, el.value);
+        });
+        
+        {% if raw_price %}
+            animateGauge({{ raw_price }});
+        {% endif %}
+    }
+
+    function animateGauge(numericValue) {
+        const canvas = document.getElementById('gaugeGraph');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+
+        const minPrice = 100000;
+        const maxPrice = 12000000; 
+        
+        let targetPercentage = (numericValue - minPrice) / (maxPrice - minPrice);
+        if(targetPercentage > 1) targetPercentage = 1;
+        if(targetPercentage < 0) targetPercentage = 0;
+
+        let currentPercentage = 0;
+        function renderFrame() {
+            if (currentPercentage < targetPercentage) {
+                currentPercentage += 0.02;
+                if (currentPercentage > targetPercentage) currentPercentage = targetPercentage;
+                drawGaugeSkeleton(ctx, canvas, currentPercentage);
+                requestAnimationFrame(renderFrame);
+            } else {
+                drawGaugeSkeleton(ctx, canvas, targetPercentage);
+            }
+        }
+        renderFrame();
+    }
+
+    function drawGaugeSkeleton(ctx, canvas, percentage) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const centerX = canvas.width / 2;
+        const centerY = canvas.height - 15;
+        const radius = 100;
+
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, radius, Math.PI, 2 * Math.PI, false);
+        ctx.lineWidth = 12;
+        ctx.strokeStyle = '#0d1127';
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, radius, Math.PI, Math.PI + (Math.PI * percentage), false);
+        ctx.lineWidth = 12;
+        const gradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
+        gradient.addColorStop(0, '#00f0ff');
+        gradient.addColorStop(0.5, '#9d4edd');
+        gradient.addColorStop(1, '#ff007f');
+        ctx.strokeStyle = gradient;
+        ctx.stroke();
+
+        const angle = Math.PI + (Math.PI * percentage);
+        const needleLen = radius - 12;
+        const targetX = centerX + needleLen * Math.cos(angle);
+        const targetY = centerY + needleLen * Math.sin(angle);
+
+        ctx.beginPath();
+        ctx.moveTo(centerX, centerY);
+        ctx.lineTo(targetX, targetY);
+        ctx.lineWidth = 4;
+        ctx.strokeStyle = '#ffffff';
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = '#ff007f';
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, 7, 0, 2 * Math.PI);
+        ctx.fillStyle = '#ffffff';
+        ctx.fill();
+
+        ctx.fillStyle = '#64748b';
+        ctx.font = 'bold 10px Plus Jakarta Sans';
+        ctx.fillText('BUDGET', centerX - radius - 5, centerY + 12);
+        ctx.fillText('PREMIUM', centerX + radius - 44, centerY + 12);
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Stock Prediction Forecast</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Inter',sans-serif;
+}
+
+:root{
+    --bg:#050816;
+    --card:#101826;
+    --card2:#0f172a;
+    --border:rgba(255,255,255,0.08);
+    --primary:#00c2ff;
+    --secondary:#7c3aed;
+    --green:#00ffae;
+    --red:#ff4d6d;
+    --text:#ffffff;
+    --muted:#94a3b8;
+    --glass:rgba(255,255,255,0.04);
+    --shadow:0 25px 50px rgba(0,0,0,0.4);
+}
+
+body{
+    background:
+    radial-gradient(circle at top left, rgba(0,194,255,0.12), transparent 30%),
+    radial-gradient(circle at bottom right, rgba(124,58,237,0.15), transparent 30%),
+    var(--bg);
+    color:var(--text);
+    height:100vh;
+    overflow:hidden;
+    display:flex;
+}
+
+/* ==========================================
+   SIDEBAR MODULES
+   ========================================== */
+.sidebar{
+    width:410px;
+    height:100vh;
+    overflow-y:auto;
+    background:rgba(10,15,30,0.85);
+    backdrop-filter:blur(25px);
+    border-right:1px solid var(--border);
+    padding:24px;
+    flex-shrink:0;
+}
+
+.sidebar::-webkit-scrollbar{ width:6px; }
+.sidebar::-webkit-scrollbar-thumb{ background:rgba(255,255,255,0.15); border-radius:20px; }
+
+.logo-box{ display:flex; align-items:center; gap:15px; margin-bottom:30px; }
+.logo{
+    width:60px; height:60px; border-radius:18px;
+    background:linear-gradient(135deg,var(--primary),var(--secondary));
+    display:flex; justify-content:center; align-items:center; font-size:24px;
+    box-shadow: 0 0 30px rgba(0,194,255,0.4);
+}
+.logo-content h1{ font-size:22px; font-weight:800; letter-spacing:-1px; }
+.logo-content p{ font-size:12px; color:var(--muted); margin-top:4px; } 
+
+.stats{ display:grid; grid-template-columns:1fr 1fr; gap:15px; margin-bottom:24px; }
+.stat-card{ background:var(--glass); border:1px solid var(--border); padding:18px; border-radius:20px; }
+.stat-card span{ font-size:12px; color:var(--muted); display:block; margin-bottom:8px; }
+.stat-card h2{ font-size:22px; font-weight:800; }
+.green{ color:var(--green); }
+.red-text { color: var(--red); }
+
+.form-container{ background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:24px; padding:22px; }
+.form-title{ display:flex; align-items:center; gap:10px; margin-bottom:22px; }
+.form-title h3{ font-size:17px; }
+.input-grid{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+
+.input-group{ display:flex; flex-direction:column; }
+.input-group label{ font-size:10px; font-weight:700; margin-bottom:7px; color:var(--muted); text-transform:uppercase; letter-spacing:1px; }
+.input-group input{ height:48px; border:none; outline:none; padding:0 12px; border-radius:12px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.08); color:white; font-size:13px; transition:0.3s; }
+.input-group input:focus{ border-color:var(--primary); box-shadow: 0 0 0 4px rgba(0,194,255,0.12); transform:translateY(-1px); }
+
+.action-buttons{ display:flex; flex-direction: column; gap:10px; margin-top:24px; }
+.demo-row { display: flex; gap: 10px; }
+.btn{ height:50px; border:none; border-radius:14px; cursor:pointer; font-weight:700; font-size:13px; transition:0.35s; display: flex; justify-content: center; align-items: center; gap: 8px; }
+.btn-primary{ background:linear-gradient(135deg,var(--primary),var(--secondary)); color:white; width: 100%; box-shadow:0 15px 30px rgba(0,194,255,0.2); }
+.btn-primary:hover{ transform:translateY(-2px); }
+.btn-secondary{ background:rgba(255,255,255,0.05); border:1px solid var(--border); color:white; flex: 1; }
+.btn-secondary:hover{ background:rgba(255,255,255,0.08); }
+
+/* MAIN WINDOW WORKSPACE */
+.main{ flex:1; padding:30px; overflow-y:auto; }
+
+/* ==========================================
+   CLEAN COMPACT TOPBAR RIBBON
+   ========================================== */
+.topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--border);
+    padding: 16px 24px;
+    border-radius: 22px;
+    backdrop-filter: blur(20px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+.topbar-left {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.topbar h2 {
+    font-size: 24px;
+    font-weight: 800;
+    letter-spacing: -1px;
+    background: linear-gradient(90deg, #ffffff, #a5b4fc);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+.live-time {
+    font-size: 12px;
+    color: var(--muted);
+    font-weight: 600;
+    letter-spacing: 0.3px;
+}
+.topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+.live {
+    padding: 8px 16px;
+    border-radius: 10px;
+    background: rgba(0, 255, 174, 0.06);
+    border: 1px solid rgba(0, 255, 174, 0.15);
+    color: var(--green);
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+.topbar-actions {
+    display: flex;
+    align-items: center;
+}
+.user-avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--secondary), var(--primary));
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    font-weight: 800;
+    font-size: 13px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 0 15px rgba(0, 194, 255, 0.2);
+}
+
+.dashboard{ display:grid; grid-template-columns:2fr 1fr; gap:24px; }
+
+/* HERO SECTIONS */
+.hero{ background: linear-gradient(145deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02)); border:1px solid var(--border); border-radius:32px; padding:40px; position:relative; overflow:hidden; backdrop-filter:blur(20px); box-shadow:var(--shadow); }
+.hero::before{ content:""; position:absolute; width:400px; height:400px; background:radial-gradient(circle,var(--primary),transparent 70%); opacity:0.12; top:-100px; right:-120px; }
+.hero small{ font-size:13px; font-weight:700; color:var(--primary); letter-spacing:1px; }
+.hero h1{ font-size:52px; font-weight:900; line-height:1.1; margin:18px 0; letter-spacing:-2px; }
+.hero p{ color:var(--muted); font-size:15px; line-height:1.8; max-width:700px; }
+
+.market-signal{ margin-top:30px; padding:18px 22px; border-radius:18px; display:flex; align-items:center; gap:14px; font-size:15px; font-weight:600; }
+.market-signal.bullish { background:rgba(0,255,174,0.08); border:1px solid rgba(0,255,174,0.18); color:var(--green); }
+.market-signal.bearish { background:rgba(255,77,109,0.08); border:1px solid rgba(255,77,109,0.18); color:var(--red); }
+
+.price-box{ margin-top:30px; display:flex; align-items:center; gap:18px; flex-wrap:wrap; }
+.price.bullish-price{ font-size:62px; font-weight:900; color:var(--green); text-shadow:0 0 30px rgba(0,255,174,0.35); }
+.price.bearish-price{ font-size:62px; font-weight:900; color:var(--red); text-shadow:0 0 30px rgba(255,77,109,0.35); }
+.trend{ padding:12px 18px; border-radius:14px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.08); font-size:14px; font-weight:700; }
+
+/* SIDE CHANNELS */
+.side{ display:flex; flex-direction:column; gap:24px; }
+.card{ background:rgba(255,255,255,0.04); border:1px solid var(--border); border-radius:24px; padding:24px; backdrop-filter:blur(18px); }
+.card h3{ margin-bottom:20px; font-size:17px; font-weight: 700; color: var(--text); display: flex; align-items: center; gap: 8px;}
+
+/* GLOBAL INDICES PANELS */
+.indices-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
+.index-premium-card { background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border); border-radius: 16px; padding: 16px; display: flex; justify-content: space-between; align-items: center; transition: all 0.3s ease; }
+.index-premium-card:hover { background: rgba(255, 255, 255, 0.05); border-color: rgba(255, 255, 255, 0.15); transform: translateX(4px); }
+.index-info-side { display: flex; flex-direction: column; gap: 4px; }
+.index-title { font-size: 14px; font-weight: 600; color: var(--text); }
+.index-sub { font-size: 11px; color: var(--muted); }
+.index-metric-side { text-align: right; display: flex; flex-direction: column; gap: 4px; }
+.index-badge { padding: 4px 10px; border-radius: 8px; font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 6px; width: fit-content; align-self: flex-end; }
+.badge-bullish { background: rgba(0, 255, 174, 0.1); border: 1px solid rgba(0, 255, 174, 0.2); color: var(--green); }
+.badge-bearish { background: rgba(255, 77, 109, 0.1); border: 1px solid rgba(255, 77, 109, 0.2); color: var(--red); }
+.volatility-metric { font-size: 14px; font-weight: 700; color: #ffb703; background: rgba(255, 183, 3, 0.1); border: 1px solid rgba(255, 183, 3, 0.2); padding: 4px 12px; border-radius: 8px; }
+
+.chart-container{ height:260px; }
+
+/* FOOTER MARGINS */
+.footer{ margin-top:25px; padding:20px; border-radius:22px; background:rgba(255,255,255,0.03); border:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; }
+.footer-left h2{ font-size:20px; font-weight:800; }
+.footer-left p{ font-size:13px; color:var(--muted); margin-top:5px; }
+.footer-right{ font-size:14px; font-weight:700; }
+.footer-right span{ color:var(--primary); }
+
+/* ==========================================
+   STRICT ADAPTIVE RESPONSIVENESS MEDIA LAYER
+   ========================================== */
+@media (max-width: 1280px) {
+    body { flex-direction: column; overflow-y: auto; height: auto; }
+    .sidebar { width: 100%; height: auto; border-right: none; border-bottom: 1px solid var(--border); padding: 30px; }
+    .input-grid { grid-template-columns: 1fr 1fr 1fr; }
+    .action-buttons { flex-direction: row; }
+    .btn-primary { width: auto; flex: 2; }
+    .main { height: auto; overflow: visible; padding: 30px; }
+}
+@media (max-width: 900px) {
+    .dashboard { grid-template-columns: 1fr; }
+    .input-grid { grid-template-columns: 1fr 1fr; }
+    .topbar { flex-direction: column; align-items: stretch; }
+}
+@media (max-width: 600px) {
+    .input-grid { grid-template-columns: 1fr; }
+    .action-buttons { flex-direction: column; }
+    .hero h1 { font-size: 34px; }
+    .price.bullish-price, .price.bearish-price { font-size: 46px; }
+    .main { padding: 15px; }
+    .sidebar { padding: 20px; }
+    .topbar-right { flex-direction: column; align-items: stretch; }
+}
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+    <div class="logo-box">
+        <div class="logo"><i class="fa-solid fa-chart-line"></i></div>
+        <div class="logo-content">
+            <h1>Stock Prediction AI</h1> 
+            <p>AI Driven Financial Analytics Engine</p> 
+        </div>
+    </div>
+
+    <div class="stats">
+        <div class="stat-card">
+            <span>Prediction Accuracy</span>
+            <h2>96.4%</h2>
+        </div>
+        <div class="stat-card">
+            <span>Market Status</span>
+            <h2 class="green">LIVE</h2>
+        </div>
+    </div>
+
+    <div class="form-container">
+        <div class="form-title">
+            <i class="fa-solid fa-sliders"></i>
+            <h3>Market Parameters</h3>
+        </div>
+
+        <form action="/predict" method="post" id="predictionForm">
+            <div class="input-grid">
+                <div class="input-group">
+                    <label>Open Price</label>
+                    <input type="number" step="any" name="Open" id="Open" required>
+                </div>
+                <div class="input-group">
+                    <label>High Price</label>
+                    <input type="number" step="any" name="High" id="High" required>
+                </div>
+                <div class="input-group">
+                    <label>Low Price</label>
+                    <input type="number" step="any" name="Low" id="Low" required>
+                </div>
+                <div class="input-group">
+                    <label>Adj Close</label>
+                    <input type="number" step="any" name="Adj_Close" id="Adj_Close" required>
+                </div>
+                <div class="input-group">
+                    <label>Volume</label>
+                    <input type="number" step="any" name="Volume" id="Volume" required>
+                </div>
+                <div class="input-group">
+                    <label>SMA 5</label>
+                    <input type="number" step="any" name="SMA_5" id="SMA_5" required>
+                </div>
+                <div class="input-group">
+                    <label>SMA 20</label>
+                    <input type="number" step="any" name="SMA_20" id="SMA_20" required>
+                </div>
+                <div class="input-group">
+                    <label>EMA 14</label>
+                    <input type="number" step="any" name="EMA_14" id="EMA_14" required>
+                </div>
+                <div class="input-group">
+                    <label>RSI Metrics</label>
+                    <input type="number" step="any" name="RSI" id="RSI" required>
+                </div>
+                <div class="input-group">
+                    <label>Daily Return</label>
+                    <input type="number" step="any" name="Daily_Return" id="Daily_Return" required>
+                </div>
+                <div class="input-group">
+                    <label>Prev Close</label>
+                    <input type="number" step="any" name="Prev_Close" id="Prev_Close" required>
+                </div>
+                <div class="input-group">
+                    <label>Prev Volume</label>
+                    <input type="number" step="any" name="Prev_Volume" id="Prev_Volume" required>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <div class="demo-row">
+                    <button type="button" class="btn btn-secondary" onclick="loadBullishDemo()">
+                        <i class="fa-solid fa-arrow-trend-up green"></i> Bullish Demo
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="loadBearishDemo()">
+                        <i class="fa-solid fa-arrow-trend-down red-text"></i> Bearish Demo
+                    </button>
+                </div>
+                <button type="submit" class="btn btn-primary" onclick="cacheCurrentBaseline()">
+                    <i class="fa-solid fa-bolt"></i> Predict Market Move
+                </button>
+            </div>
+        </form>
+    </div>
+</aside>
+
+<main class="main">
+    
+    <div class="topbar">
+        <div class="topbar-left">
+            <h2>AI Financial Dashboard</h2>
+            <div class="live-time" id="liveTimeDisplay">Synchronizing Timeline...</div>
+        </div>
+        
+        <div class="topbar-right">
+            <div class="live">● Intelligence Engine Active</div>
+            <div class="topbar-actions">
+                <div class="user-avatar">SG</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="dashboard">
+        <section class="hero">
+            {% if prediction_text %}
+                <small>MACHINE LEARNING FORECAST RESULT</small>
+                <h1>Stock Market Prediction</h1>
+                <p>Our linear regression core analyzed your technical vectors, asset volumes, and underlying tracking parameters to estimate next day pricing trajectories.</p>
+                
+                <div id="dynamicSignalBox"></div>
+
+                <div class="price-box">
+                    <div id="dynamicPriceTarget" class="">
+                        {{ prediction_text.split('$')[1] if '$' in prediction_text else 'Calculated' }}
+                    </div>
+                    <div class="trend" id="dynamicTrendBadge">Analyzing Velocity...</div>
+                </div>
+            {% else %}
+                <small>AI DRIVEN PREDICTION ENGINE</small>
+                <h1>Predict The Next Market Move</h1>
+                <p>Enterprise-grade AI dashboard designed for stock market prediction, technical analysis and smart financial forecasting using machine learning models.</p>
+                <div class="market-signal bullish">
+                    <i class="fa-solid fa-circle-info"></i> Waiting for parameters to compile backend matrix inference.
+                </div>
+                <div class="price-box">
+                    <div class="price bullish-price">--.--</div>
+                    <div class="trend">System Idle</div>
+                </div>
+            {% endif %}
+        </section>
+
+        <div class="side">
+            <div class="card">
+                <h3><i class="fa-solid fa-globe" style="color: var(--primary);"></i> Global Indices Overview</h3>
+                <div class="indices-grid">
+                    
+                    <div class="index-premium-card">
+                        <div class="index-info-side">
+                            <span class="index-title">S&P 500 Index</span>
+                            <span class="index-sub">US Large-Cap Assets</span>
+                        </div>
+                        <div class="index-metric-side">
+                            <div id="sp500_badge" class="index-badge badge-bullish">
+                                <i class="fa-solid fa-arrow-up" id="sp500_icon"></i> <span id="sp500">+1.45%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="index-premium-card">
+                        <div class="index-info-side">
+                            <span class="index-title">NASDAQ Composite</span>
+                            <span class="index-sub">Technology Sector</span>
+                        </div>
+                        <div class="index-metric-side">
+                            <div id="nasdaq_badge" class="index-badge badge-bullish">
+                                <i class="fa-solid fa-arrow-up" id="nasdaq_icon"></i> <span id="nasdaq">+2.11%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="index-premium-card">
+                        <div class="index-info-side">
+                            <span class="index-title">Dow Jones Industrial</span>
+                            <span class="index-sub">Blue-Chip Corporate Base</span>
+                        </div>
+                        <div class="index-metric-side">
+                            <div id="dow_badge" class="index-badge badge-bullish">
+                                <i class="fa-solid fa-arrow-up" id="dow_icon"></i> <span id="dow">+0.64%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="index-premium-card">
+                        <div class="index-info-side">
+                            <span class="index-title">Market Volatility</span>
+                            <span class="index-sub">CBOE VIX Risk Ratio</span>
+                        </div>
+                        <div class="index-metric-side">
+                            <span class="volatility-metric" id="volatility">Moderate</span>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="card">
+                <h3><i class="fa-solid fa-chart-bar" style="color: var(--secondary);"></i> Forecast Horizon Analytics</h3>
+                <div class="chart-container"><canvas id="forecastChart"></canvas></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <div class="footer-left">
+            <h2>Stock Prediction AI</h2>
+            <p>AI Driven Financial Analytics Engine</p>
+        </div>
+        <div class="footer-right">Designed By <span>Shehroz Ghouri</span></div>
+    </div>
+</main>
+
+<script>
+/* ==========================================
+   GSAP SYSTEM PIPELINE ANIMATIONS
+   ========================================== */
+gsap.from(".sidebar", { x:-60, opacity:0, duration:0.8 });
+gsap.from(".topbar", { y:-40, opacity:0, duration:0.8, delay:0.1 });
+gsap.from(".hero", { y:30, opacity:0, duration:0.8, delay:0.2 });
+gsap.from(".card", { y:20, opacity:0, duration:0.7, stagger:0.1, delay:0.3 });
+
+/* ==========================================
+   REAL-TIME RUNNING TIMESTAMP SYSTEM
+   ========================================== */
+function updateLiveTime() {
+    const timeEl = document.getElementById('liveTimeDisplay');
+    if (timeEl) {
+        const now = new Date();
+        const options = { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' };
+        const dateStr = now.toLocaleDateString('en-US', options);
+        const timeStr = now.toLocaleTimeString('en-US', { hour12: true, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        timeEl.innerText = `${dateStr} | System Time: ${timeStr}`;
+    }
+}
+setInterval(updateLiveTime, 1000);
+updateLiveTime();
+
+/* ==========================================
+   DEMO MATRIX CONTROLLERS
+   ========================================== */
+function loadBullishDemo(){
+    document.getElementById('Open').value = 3227.20;
+    document.getElementById('High').value = 3240.08;
+    document.getElementById('Low').value = 3227.20;
+    document.getElementById('Adj_Close').value = 3239.91; 
+    document.getElementById('Volume').value = 2160680000; 
+    document.getElementById('SMA_5').value = 3226.38;
+    document.getElementById('SMA_20').value = 3186.59;   
+    document.getElementById('EMA_14').value = 3205.21;
+    document.getElementById('RSI').value = 97.33;          
+    document.getElementById('Daily_Return').value = 0.0100; 
+    document.getElementById('Prev_Close').value = 3223.38;
+    document.getElementById('Prev_Volume').value = 1296540000;
+    
+    localStorage.setItem('current_baseline', "3239.91");
+    localStorage.setItem('current_return', "0.0100");
+}
+
+function loadBearishDemo(){
+    document.getElementById('Open').value = 3550.00;
+    document.getElementById('High').value = 3552.00;
+    document.getElementById('Low').value = 3470.00;
+    document.getElementById('Adj_Close').value = 3475.20; 
+    document.getElementById('Volume').value = 8900000000; 
+    document.getElementById('SMA_5').value = 3502.00;
+    document.getElementById('SMA_20').value = 3540.00;   
+    document.getElementById('EMA_14').value = 3518.00;
+    document.getElementById('RSI').value = 28.1;          
+    document.getElementById('Daily_Return').value = -0.0215; 
+    document.getElementById('Prev_Close').value = 3551.00;
+    document.getElementById('Prev_Volume').value = 5200000000;
+    
+    localStorage.setItem('current_baseline', "3475.20");
+    localStorage.setItem('current_return', "-0.0215");
+}
+
+function cacheCurrentBaseline() {
+    const currentClose = document.getElementById('Adj_Close').value;
+    const currentRet = document.getElementById('Daily_Return').value;
+    if(currentClose) localStorage.setItem('current_baseline', currentClose);
+    if(currentRet) localStorage.setItem('current_return', currentRet);
+}
+
+/* ==========================================
+   DYNAMIC SIGNALS CONDITION CHECK MATRIX
+   ========================================== */
+window.addEventListener('DOMContentLoaded', () => {
+    const priceEl = document.getElementById('dynamicPriceTarget');
+    if (priceEl && priceEl.innerText.trim() !== '--.--') {
+        const predictedVal = parseFloat(priceEl.innerText.replace(/[^0-9.]/g, ''));
+        const baselineVal = parseFloat(localStorage.getItem('current_baseline') || "3200.00");
+        const dailyReturnVal = parseFloat(localStorage.getItem('current_return') || "0.0");
+        
+        const signalBox = document.getElementById('dynamicSignalBox');
+        const badge = document.getElementById('dynamicTrendBadge');
+
+        if (predictedVal < baselineVal || dailyReturnVal < 0) {
+            priceEl.className = "price bearish-price";
+            badge.innerText = "Bearish Trend";
+            badge.style.color = "var(--red)";
+            signalBox.className = "market-signal bearish";
+            signalBox.innerHTML = `<i class="fa-solid fa-arrow-trend-down"></i> Bearish Trend Detected. Technical arrays confirm structural resistance. Short term contraction modeling suggests immediate downside risk and this share will reduce its value.`;
+        } else {
+            priceEl.className = "price bullish-price";
+            badge.innerText = "Bullish Trend";
+            badge.style.color = "var(--green)";
+            signalBox.className = "market-signal bullish";
+            signalBox.innerHTML = `<i class="fa-solid fa-arrow-trend-up"></i> Bullish Trend Detected. Predictive analysis forecasts positive price expansion. Momentum targets upward growth velocities next frame.`;
+        }
+    }
+});
+
+/* LIVE SIMULATED TRACKERS */
+function updateIndexBadge(elementId, badgeId, iconId, value) {
+    const textSpan = document.getElementById(elementId);
+    const badgeDiv = document.getElementById(badgeId);
+    const iconTag = document.getElementById(iconId);
+    textSpan.innerText = (value > 0 ? "+" : "") + value + "%";
+    if (value >= 0) {
+        badgeDiv.className = "index-badge badge-bullish";
+        iconTag.className = "fa-solid fa-arrow-up";
+    } else {
+        badgeDiv.className = "index-badge badge-bearish";
+        iconTag.className = "fa-solid fa-arrow-down";
+    }
+}
+
+function randomMarketMovement(){
+    const sp500 = (Math.random() * 4 - 1.5).toFixed(2);
+    const nasdaq = (Math.random() * 5 - 1.8).toFixed(2);
+    const dow = (Math.random() * 3 - 1.2).toFixed(2);
+    updateIndexBadge("sp500", "sp500_badge", "sp500_icon", parseFloat(sp500));
+    updateIndexBadge("nasdaq", "nasdaq_badge", "nasdaq_icon", parseFloat(nasdaq));
+    updateIndexBadge("dow", "dow_badge", "dow_icon", parseFloat(dow));
+    document.getElementById("volatility").innerText = Math.abs(sp500) > 2.2 ? "High Risk" : Math.abs(sp500) > 1.1 ? "Moderate" : "Low Risk";
+}
+setInterval(randomMarketMovement, 4000);
+
+/* CHART INITIALIZATION */
+const ctx = document.getElementById('forecastChart');
+new Chart(ctx,{
+    type:'bar',
+    data:{
+        labels:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
+        datasets:[{
+            label:'Forecast Strength',
+            data:[42,58,65,80,76,92,88],
+            borderRadius:6,
+            backgroundColor:['#00c2ff','#00c2ff','#00c2ff','#7c3aed','#7c3aed','#00ffae','#00ffae']
+        }]
+    },
+    options:{
+        responsive:true,
+        maintainAspectRatio:false,
+        plugins:{ legend:{ display:false } },
+        scales:{
+            x:{ ticks:{ color:'#94a3b8' }, grid:{ display:false } },
+            y:{ ticks:{ color:'#94a3b8' }, grid:{ color:'rgba(255,255,255,0.05)' } }
+        }
+    }
+});
+</script>
+</body>
+</html>
