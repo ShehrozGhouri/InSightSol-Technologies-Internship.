@@ -1,4 +1,4 @@
-# InsightSol Technologies AI/ML Internship
+# InSightSol Technologies AI/ML Internship
 
 Welcome to my official portfolio repository showcasing the machine learning applications developed during my remote AI Engineering Internship at **InsightSol Technologies**. This repository contains end-to-end predictive analytics web applications, demonstrating robust data workflows, feature engineering, model optimization, and clean deployment interfaces.
 
